@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions, Alert } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,8 +17,10 @@ const bounceDuration = 1000;
 const { width, height } = Dimensions.get("window");
 
 const useBouncingStyle = (delay: number) => {
+  // move to own file
   const translateY = useSharedValue(0);
 
+  //cosntant bouncing
   React.useEffect(() => {
     const bounce = () =>
       withRepeat(
@@ -74,29 +76,35 @@ export default function GameScreen() {
   };
 
   const showSelected = (choice: "rock" | "paper" | "scissors") => {
-    setSelected(choice);
-    opacity.value = withTiming(0.5, { duration: 300 });
+    //move to own file
+    setSelected(choice); //setting choice
+    opacity.value = withTiming(0.5, { duration: 300 }); //dimming background
 
-    // Fade out non-selected cards
+    //fade out non-selected cards
     rockOpacity.value = withTiming(choice === "rock" ? 1 : 0, {
-      duration: 1000,
+      duration: 500,
     });
     paperOpacity.value = withTiming(choice === "paper" ? 1 : 0, {
-      duration: 1000,
+      duration: 500,
     });
     scissorsOpacity.value = withTiming(choice === "scissors" ? 1 : 0, {
-      duration: 1000,
+      duration: 500,
     });
-
+    //card positions
     const fromX = cardPositions[choice];
     const toX = centerX;
-
+    //translate card to center
     const translateX = toX - fromX - 20;
     const translateY = centerY - (height / 2 - cardHeight / 2);
-
+    //animation for translating
     selectedTranslateX.value = withTiming(translateX, { duration: 500 });
     selectedTranslateY.value = withTiming(translateY, { duration: 500 });
     selectedScale.value = withTiming(1.8, { duration: 500 });
+    //returning back to original postion and fade back in other cards
+
+    //determine winner
+    const result = determineWinner(choice);
+    console.log(Alert.alert(result.randomChoice, result.result));
 
     setTimeout(() => {
       opacity.value = withTiming(0, { duration: 300 });
@@ -155,6 +163,30 @@ export default function GameScreen() {
   const rockSelectedStyle = selectedCardTransform("rock");
   const paperSelectedStyle = selectedCardTransform("paper");
   const scissorsSelectedStyle = selectedCardTransform("scissors");
+
+  const getRandomChoice = (): "rock" | "paper" | "scissors" => {
+    // move
+    const choices = ["rock", "paper", "scissors"] as const;
+    const randomIndex = Math.floor(Math.random() * choices.length);
+    return choices[randomIndex];
+  };
+
+  const determineWinner = (choice: "rock" | "paper" | "scissors") => {
+    //move
+    const randomChoice = getRandomChoice();
+
+    if (choice === randomChoice) return { result: "lost", randomChoice };
+
+    if (
+      (choice === "rock" && randomChoice === "scissors") ||
+      (choice === "paper" && randomChoice === "rock") ||
+      (choice === "scissors" && randomChoice === "paper")
+    ) {
+      return { result: "winner", randomChoice };
+    }
+
+    return { result: "lost", randomChoice };
+  };
 
   return (
     <View style={styles.container}>
