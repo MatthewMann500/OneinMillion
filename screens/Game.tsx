@@ -8,10 +8,14 @@ import Animated, {
   withTiming,
   Easing,
   runOnJS,
+  withDelay,
 } from "react-native-reanimated";
 import rock from "../assets/Rock_Card.png";
 import paper from "../assets/Paper_Card.png";
 import scissors from "../assets/Scissors_Card.png";
+import rockHand from "../assets/Rock.png";
+import paperHand from "../assets/Paper.png";
+import scissorsHand from "../assets/Scissors.png";
 
 const bounceDuration = 1000;
 const { width, height } = Dimensions.get("window");
@@ -52,7 +56,9 @@ export default function GameScreen() {
   const [selected, setSelected] = useState<
     "rock" | "paper" | "scissors" | null
   >(null);
-
+  const [randomChoice, setRandomChoice] = useState<
+    "rock" | "paper" | "scissors" | null
+  >(null);
   const opacity = useSharedValue(0);
 
   const rockOpacity = useSharedValue(1);
@@ -62,6 +68,8 @@ export default function GameScreen() {
   const selectedTranslateX = useSharedValue(0);
   const selectedTranslateY = useSharedValue(0);
   const selectedScale = useSharedValue(1);
+
+  const randomTranslateY = useSharedValue(0);
 
   const cardWidth = 100;
   const cardHeight = 250;
@@ -99,12 +107,20 @@ export default function GameScreen() {
     //animation for translating
     selectedTranslateX.value = withTiming(translateX, { duration: 500 });
     selectedTranslateY.value = withTiming(translateY, { duration: 500 });
-    selectedScale.value = withTiming(1.8, { duration: 500 });
+    selectedScale.value = withTiming(1.5, { duration: 500 });
     //returning back to original postion and fade back in other cards
 
     //determine winner
     const result = determineWinner(choice);
-    console.log(Alert.alert(result.randomChoice, result.result));
+    setRandomChoice(result.randomChoice);
+
+    const randomTranslatedY = -170;
+
+    randomTranslateY.value = withSequence(
+      withDelay(2000, withTiming(randomTranslatedY, { duration: 500 })),
+      withDelay(1500, withTiming(randomTranslatedY, { duration: 0 })),
+      withTiming(100, { duration: 300 })
+    );
 
     setTimeout(() => {
       opacity.value = withTiming(0, { duration: 300 });
@@ -118,7 +134,7 @@ export default function GameScreen() {
       selectedScale.value = withTiming(1, { duration: 500 });
 
       setTimeout(() => runOnJS(setSelected)(null), 600);
-    }, 2000);
+    }, 4000);
   };
 
   const dimStyle = useAnimatedStyle(() => ({
@@ -156,6 +172,13 @@ export default function GameScreen() {
       return {};
     });
 
+  const randomChoiceTransform = () =>
+    useAnimatedStyle(() => {
+      return {
+        transform: [{ translateY: randomTranslateY.value }],
+      };
+    });
+
   const img1Style = useBouncingStyle(0);
   const img2Style = useBouncingStyle(200);
   const img3Style = useBouncingStyle(400);
@@ -163,6 +186,8 @@ export default function GameScreen() {
   const rockSelectedStyle = selectedCardTransform("rock");
   const paperSelectedStyle = selectedCardTransform("paper");
   const scissorsSelectedStyle = selectedCardTransform("scissors");
+
+  const randomChoiceStyle = randomChoiceTransform();
 
   const getRandomChoice = (): "rock" | "paper" | "scissors" => {
     // move
@@ -190,6 +215,20 @@ export default function GameScreen() {
 
   return (
     <View style={styles.container}>
+      {randomChoice && (
+        <View style={styles.resultContainer}>
+          <Animated.Image
+            source={
+              randomChoice === "rock"
+                ? rockHand
+                : randomChoice === "paper"
+                ? paperHand
+                : scissorsHand
+            }
+            style={[styles.resultImage, randomChoiceStyle]}
+          />
+        </View>
+      )}
       <Animated.View style={dimStyle} />
       <View style={styles.row}>
         <View
@@ -260,5 +299,20 @@ const styles = StyleSheet.create({
     width: 100,
     height: 250,
     objectFit: "contain",
+  },
+  resultImage: {
+    width: 230,
+    height: 310,
+    resizeMode: "contain",
+    transform: [{ rotate: "180deg" }],
+  },
+  resultContainer: {
+    position: "absolute",
+    top: -200,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 100,
+    transform: [{ rotate: "180deg" }],
   },
 });
