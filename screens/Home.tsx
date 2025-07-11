@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   bottomSpacer: {
-    height: 60, // adjust to control spacing below button
+    height: 120, // adjust to control spacing below button
   },
   button: {
     backgroundColor: "#3b82f6",

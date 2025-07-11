@@ -16,6 +16,8 @@ import scissors from "../assets/Scissors_Card.png";
 import rockHand from "../assets/Rock.png";
 import paperHand from "../assets/Paper.png";
 import scissorsHand from "../assets/Scissors.png";
+import { TypeAnimation } from "react-native-type-animation";
+import { toWords } from "number-to-words";
 
 const bounceDuration = 1000;
 const { width, height } = Dimensions.get("window");
@@ -60,10 +62,12 @@ export default function GameScreen() {
     "rock" | "paper" | "scissors" | null
   >(null);
   const opacity = useSharedValue(0);
+  const redOpacity = useSharedValue(0);
 
   const rockOpacity = useSharedValue(1);
   const paperOpacity = useSharedValue(1);
   const scissorsOpacity = useSharedValue(1);
+  const textOpacity = useSharedValue(1);
 
   const selectedTranslateX = useSharedValue(0);
   const selectedTranslateY = useSharedValue(0);
@@ -76,6 +80,9 @@ export default function GameScreen() {
 
   const centerX = width / 2 - cardWidth / 2;
   const centerY = height / 2 - cardHeight / 2;
+
+  const [rounds, setRounds] = useState(1);
+  const word = toWords(rounds);
 
   const cardPositions = {
     rock: 0,
@@ -98,6 +105,7 @@ export default function GameScreen() {
     scissorsOpacity.value = withTiming(choice === "scissors" ? 1 : 0, {
       duration: 500,
     });
+    textOpacity.value = withTiming(0, { duration: 500 });
     //card positions
     const fromX = cardPositions[choice];
     const toX = centerX;
@@ -114,20 +122,25 @@ export default function GameScreen() {
     const result = determineWinner(choice);
     setRandomChoice(result.randomChoice);
 
-    const randomTranslatedY = -170;
+    const randomTranslatedY = -270;
 
     randomTranslateY.value = withSequence(
       withDelay(2000, withTiming(randomTranslatedY, { duration: 500 })),
       withDelay(1500, withTiming(randomTranslatedY, { duration: 0 })),
       withTiming(100, { duration: 300 })
     );
-
     setTimeout(() => {
       opacity.value = withTiming(0, { duration: 300 });
 
       rockOpacity.value = withTiming(1, { duration: 500 });
       paperOpacity.value = withTiming(1, { duration: 500 });
       scissorsOpacity.value = withTiming(1, { duration: 500 });
+      if (result.result === "winner") {
+        setRounds((prev) => prev + 1);
+        textOpacity.value = withTiming(1, { duration: 500 });
+      } else {
+        redOpacity.value = withTiming(0.7, { duration: 1000 });
+      }
 
       selectedTranslateX.value = withTiming(0, { duration: 500 });
       selectedTranslateY.value = withTiming(0, { duration: 500 });
@@ -144,8 +157,18 @@ export default function GameScreen() {
     left: 0,
     width,
     height,
-    opacity: opacity.value,
+    opacity: redOpacity.value,
     zIndex: 1,
+  }));
+  const redStyle = useAnimatedStyle(() => ({
+    backgroundColor: "red",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width,
+    height,
+    opacity: redOpacity.value,
+    zIndex: redOpacity.value > 0 ? 10 : 0,
   }));
 
   const rockStyle = useAnimatedStyle(() => ({
@@ -156,6 +179,10 @@ export default function GameScreen() {
   }));
   const scissorsStyle = useAnimatedStyle(() => ({
     opacity: scissorsOpacity.value,
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
   }));
 
   const selectedCardTransform = (card: "rock" | "paper" | "scissors") =>
@@ -229,7 +256,33 @@ export default function GameScreen() {
           />
         </View>
       )}
+      <Animated.View style={redStyle} />
       <Animated.View style={dimStyle} />
+      <Animated.View style={textStyle}>
+        <TypeAnimation
+          key={word}
+          sequence={[
+            { text: "Round" },
+            { text: `Round ${word}`, delayBetweenSequence: 2000 },
+            { text: "", delayBetweenSequence: 500 },
+            { text: "Rock, Paper, Scissors", delayBetweenSequence: 500 },
+            { text: "", delayBetweenSequence: 500 },
+            { text: "Which one is correct", delayBetweenSequence: 500 },
+            { text: "", delayBetweenSequence: 500 },
+            { text: "It could be paper", delayBetweenSequence: 500 },
+            { text: "", delayBetweenSequence: 500 },
+            { text: "Even rock", delayBetweenSequence: 700 },
+            { text: "", delayBetweenSequence: 500 },
+            { text: "But what if it's scissors", delayBetweenSequence: 500 },
+          ]}
+          loop={true}
+          deletionSpeed={50}
+          style={{
+            color: "black",
+            fontSize: 30,
+          }}
+        ></TypeAnimation>
+      </Animated.View>
       <View style={styles.row}>
         <View
           style={[styles.cardSlot, { zIndex: selected === "rock" ? 10 : 1 }]}
@@ -308,7 +361,7 @@ const styles = StyleSheet.create({
   },
   resultContainer: {
     position: "absolute",
-    top: -200,
+    top: -300,
     left: 0,
     right: 0,
     alignItems: "center",
