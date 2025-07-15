@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Pressable, Alert } from "react-native";
+import { Text, Image, View, StyleSheet, Pressable, Alert } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -37,6 +37,12 @@ export default function HomeScreen({ navigation }) {
     <SPBattle key="SP" />,
     <PRBattle key="PR" />,
     <RSBattle key="RS" />,
+  ];
+
+  const tokenCardImages = [
+    require("../assets/Paper_Card.png"),
+    require("../assets/Rock_Card.png"),
+    require("../assets/Scissors_Card.png"),
   ];
   const [currentBattleIndex, setCurrentBattleIndex] = React.useState(0);
 
@@ -85,10 +91,25 @@ export default function HomeScreen({ navigation }) {
     <View className="flex-1 bg-white">
       {battles[currentBattleIndex]}
       <View className="flex-1 justify-center items-center">
-        <Text className="text-[24px] text-blue-500 font-bold mb-[20px]">
-          You have {tokens} token{tokens === 1 ? "" : "s"}
-        </Text>
-        {tokens < 2 && remainingTime && (
+        <View style={{ flexDirection: "row", marginBottom: 20 }}>
+          {tokens > 0 ? (
+            tokenCardImages
+              .slice(0, tokens)
+              .map((imgSrc, i) => (
+                <Image
+                  key={i}
+                  source={imgSrc}
+                  style={{ width: 40, height: 60, marginHorizontal: 4 }}
+                  resizeMode="contain"
+                />
+              ))
+          ) : (
+            <Text style={{ color: "#6b7280", fontSize: 16 }}>
+              No tokens available
+            </Text>
+          )}
+        </View>
+        {tokens < 3 && remainingTime && (
           <Text style={{ marginBottom: 16, color: "#6b7280" }}>
             Next token in: {remainingTime}
           </Text>

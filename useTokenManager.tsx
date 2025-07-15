@@ -3,8 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TOKEN_KEY = "TOKENS";
 const LAST_USED_KEY = "LAST_USED";
-const MAX_TOKENS = 2;
-const REGEN_HOURS = 12;
+const MAX_TOKENS = 3;
+const REGEN_HOURS = 8;
 const MS_PER_TOKEN = REGEN_HOURS * 60 * 60 * 1000;
 
 export function useTokenManager() {
