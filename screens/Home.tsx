@@ -10,7 +10,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
 import { useTokenManager } from "../useTokenManager";
-import RPSBattle from "../RockScissors";
+import RSBattle from "../RockScissors";
+import PRBattle from "../PaperRock";
+import SPBattle from "../ScissorsPaper";
 
 const duration = 800;
 
@@ -30,6 +32,20 @@ export default function HomeScreen({ navigation }) {
 
   const { tokens, useToken, nextTokenIn } = useTokenManager();
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
+
+  const battles = [
+    <SPBattle key="SP" />,
+    <PRBattle key="PR" />,
+    <RSBattle key="RS" />,
+  ];
+  const [currentBattleIndex, setCurrentBattleIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBattleIndex((prev) => (prev + 1) % battles.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     offset.value = withRepeat(
@@ -67,7 +83,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View className="flex-1 bg-white">
-      <RPSBattle />
+      {battles[currentBattleIndex]}
       <View className="flex-1 justify-center items-center">
         <Text className="text-[24px] text-blue-500 font-bold mb-[20px]">
           You have {tokens} token{tokens === 1 ? "" : "s"}
