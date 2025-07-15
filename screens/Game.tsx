@@ -63,6 +63,7 @@ export default function GameScreen() {
   >(null);
   const opacity = useSharedValue(0);
   const redOpacity = useSharedValue(0);
+  const lostOpacity = useSharedValue(0);
 
   const rockOpacity = useSharedValue(1);
   const paperOpacity = useSharedValue(1);
@@ -83,6 +84,8 @@ export default function GameScreen() {
 
   const [rounds, setRounds] = useState(1);
   const word = toWords(rounds);
+
+  const [lossMessage, setLossMessage] = useState("");
 
   const cardPositions = {
     rock: 0,
@@ -140,6 +143,9 @@ export default function GameScreen() {
         textOpacity.value = withTiming(1, { duration: 500 });
       } else {
         redOpacity.value = withTiming(0.7, { duration: 1000 });
+        lostOpacity.value = withTiming(1, { duration: 1000 });
+        const message = getProbabilityText(rounds);
+        runOnJS(setLossMessage)(`Maybe next time...\n${message}`);
       }
 
       selectedTranslateX.value = withTiming(0, { duration: 500 });
@@ -161,7 +167,7 @@ export default function GameScreen() {
     zIndex: 1,
   }));
   const redStyle = useAnimatedStyle(() => ({
-    backgroundColor: "red",
+    backgroundColor: "#FF0000",
     position: "absolute",
     top: 0,
     left: 0,
@@ -183,6 +189,10 @@ export default function GameScreen() {
 
   const textStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
+  }));
+
+  const lostStyle = useAnimatedStyle(() => ({
+    opacity: lostOpacity.value,
   }));
 
   const selectedCardTransform = (card: "rock" | "paper" | "scissors") =>
@@ -240,6 +250,20 @@ export default function GameScreen() {
     return { result: "lost", randomChoice };
   };
 
+  const getProbabilityText = (roundLostOn: number) => {
+    const winsBeforeLoss = roundLostOn - 1;
+
+    if (winsBeforeLoss === 0) {
+      return "Welp... \n you lost a 1 in 3 chance...";
+    }
+
+    const denominator = Math.pow(3, winsBeforeLoss);
+    const percentage = ((1 / denominator) * 100).toFixed(5);
+    return `You made it through ${winsBeforeLoss} win${
+      winsBeforeLoss > 1 ? "s" : ""
+    } that's a 1 in ${denominator} chance or ${percentage}% chance!`;
+  };
+
   return (
     <View style={styles.container}>
       {randomChoice && (
@@ -256,7 +280,13 @@ export default function GameScreen() {
           />
         </View>
       )}
-      <Animated.View style={redStyle} />
+      <Animated.View style={redStyle}>
+        <View style={styles.lossMessageContainer}>
+          <Animated.Text style={styles.lossMessageText}>
+            {lossMessage}
+          </Animated.Text>
+        </View>
+      </Animated.View>
       <Animated.View style={dimStyle} />
       <Animated.View style={textStyle}>
         <TypeAnimation
@@ -342,6 +372,11 @@ const styles = StyleSheet.create({
     gap: 10,
     zIndex: 1,
   },
+  col: {
+    flexDirection: "column",
+    gap: 10,
+    zIndex: 1,
+  },
   cardSlot: {
     width: 100,
     height: 250,
@@ -367,5 +402,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 100,
     transform: [{ rotate: "180deg" }],
+  },
+  lossMessageContainer: {
+    flex: 1,
+    alignItems: "center",
+    padding: 20,
+    marginTop: 80,
+  },
+  lossMessageText: {
+    fontSize: 24,
+    color: "white",
+    textAlign: "center",
+    zIndex: 11,
   },
 });
