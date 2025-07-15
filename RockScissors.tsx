@@ -10,24 +10,61 @@ import Animated, {
 } from "react-native-reanimated";
 import symbolicateStackTrace from "react-native/Libraries/Core/Devtools/symbolicateStackTrace";
 
-const DURATION = 500;
-
-export default function RPSBattle() {
+export default function RSBattle() {
   const leftX = useSharedValue(400);
   const rightX = useSharedValue(400);
+  const rightY = useSharedValue(0);
+  const rotateRightZ = useSharedValue(0);
+  const rotateLeftY = useSharedValue(0);
 
   useEffect(() => {
     // Animate both hands coming in
-    leftX.value = withTiming(50, { duration: DURATION });
-    rightX.value = withTiming(50, { duration: DURATION }, () => {});
+    leftX.value = withTiming(50, { duration: 500 }, () => {
+      leftX.value = withDelay(
+        700,
+        withTiming(0, { duration: 300 }, () => {
+          rotateLeftY.value = withDelay(700, withTiming(80, { duration: 100 }));
+          leftX.value = withDelay(
+            700,
+            withTiming(50, { duration: 300 }, () => {
+              leftX.value = withDelay(400, withTiming(400, { duration: 300 }));
+            })
+          );
+        })
+      );
+    });
+
+    rightX.value = withTiming(50, { duration: 500 }, () => {
+      rotateRightZ.value = withDelay(700, withTiming(25, { duration: 300 }));
+      rightY.value = withDelay(
+        700,
+        withTiming(60, { duration: 300 }, () => {
+          rotateRightZ.value = withDelay(700, withTiming(0, { duration: 300 }));
+          rightY.value = withDelay(700, withTiming(0, { duration: 300 }));
+          rightX.value = withDelay(
+            700,
+            withTiming(0, { duration: 300 }, () => {
+              rightX.value = withDelay(700, withTiming(400, { duration: 300 }));
+            })
+          );
+        })
+      );
+    });
   }, []);
 
   const leftStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: leftX.value }], //idky
+    transform: [
+      { translateY: leftX.value },
+      { rotateY: `${rotateLeftY.value}deg` as const },
+    ], //idky
   }));
 
   const rightStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: rightX.value }], //idky
+    transform: [
+      { translateY: rightX.value },
+      { translateX: rightY.value },
+      { rotateZ: `${rotateRightZ.value}deg` as const },
+    ],
   }));
 
   return (
@@ -59,6 +96,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderColor: "black",
     borderWidth: 5,
+    marginTop: 50,
     position: "relative",
   },
   leftContainer: {
