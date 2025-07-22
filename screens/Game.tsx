@@ -90,7 +90,7 @@ export default function GameScreen({ navigation }) {
   const centerX = width / 2 - cardWidth / 2;
   const centerY = height / 2 - cardHeight / 2;
 
-  const [rounds, setRounds] = useState(13);
+  const [rounds, setRounds] = useState(1);
   const word = toWords(rounds);
 
   const [lossMessage, setLossMessage] = useState("");

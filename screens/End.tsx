@@ -13,10 +13,9 @@ const { width, height } = Dimensions.get("window");
 const atrophyImage = require("../assets/Trophy13.png");
 
 export default function EndScreen({ navigation }) {
-  const imageTranslateY = useSharedValue(height); // start off screen bottom
+  const imageTranslateY = useSharedValue(height);
   const imageOpacity = useSharedValue(0);
 
-  // Opacity for each line of text
   const text1Opacity = useSharedValue(0);
   const text2Opacity = useSharedValue(0);
   const text3Opacity = useSharedValue(0);
@@ -24,14 +23,12 @@ export default function EndScreen({ navigation }) {
   const buttonTranslateY = useSharedValue(height);
 
   useEffect(() => {
-    // Animate image coming up and fading in
     imageTranslateY.value = withTiming(-300, {
       duration: 3000,
       easing: Easing.out(Easing.cubic),
     });
     imageOpacity.value = withTiming(1, { duration: 2000 });
 
-    // Sequential fade in for each text line
     const animateText = async () => {
       text1Opacity.value = withTiming(1, { duration: 2500 });
       await delay(1500);
@@ -42,7 +39,6 @@ export default function EndScreen({ navigation }) {
       text3Opacity.value = withTiming(1, { duration: 4500 });
       await delay(1200);
 
-      // Show button sliding up
       buttonTranslateY.value = withTiming(0, {
         duration: 800,
         easing: Easing.out(Easing.cubic),
@@ -119,7 +115,7 @@ const styles = StyleSheet.create({
   },
   textWrapper: {
     position: "absolute",
-    bottom: height * 0.6 + 40, // Adjust so text is above trophy
+    bottom: height * 0.6 + 40,
     width: "100%",
     alignItems: "center",
   },

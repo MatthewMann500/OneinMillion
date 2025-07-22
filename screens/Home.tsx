@@ -76,13 +76,12 @@ export default function HomeScreen({ navigation }) {
   }, [tokens, nextTokenIn]);
 
   const handlePlay = async () => {
-    // const ok = await useToken();
-    // if (ok) {
-    //   navigation.navigate("Game");
-    // } else {
-    //   Alert.alert("No tokens", "You need to wait until a token regenerates.");
-    // }
-    navigation.navigate("Game");
+    const ok = await useToken();
+    if (ok) {
+      navigation.navigate("Game");
+    } else {
+      Alert.alert("No tokens", "You need to wait until a token regenerates.");
+    }
   };
 
   return (
