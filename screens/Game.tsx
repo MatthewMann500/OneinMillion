@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Pressable, Dimensions, Alert } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  Dimensions,
+  Alert,
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -54,7 +61,7 @@ const useBouncingStyle = (delay: number) => {
   }));
 };
 
-export default function GameScreen() {
+export default function GameScreen({ navigation }) {
   const [selected, setSelected] = useState<
     "rock" | "paper" | "scissors" | null
   >(null);
@@ -285,6 +292,14 @@ export default function GameScreen() {
           <Animated.Text style={styles.lossMessageText}>
             {lossMessage}
           </Animated.Text>
+          <Pressable
+            style={styles.button}
+            onPress={() => {
+              navigation.navigate("Home");
+            }}
+          >
+            <Text style={styles.buttonText}>Go Back to Home</Text>
+          </Pressable>
         </View>
       </Animated.View>
       <Animated.View style={dimStyle} />
@@ -414,5 +429,18 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     zIndex: 11,
+  },
+  button: {
+    backgroundColor: "black",
+    margin: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    marginBottom: 80,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

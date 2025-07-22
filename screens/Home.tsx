@@ -26,9 +26,6 @@ function formatTime(ms: number): string {
 
 export default function HomeScreen({ navigation }) {
   const offset = useSharedValue<number>(120 / 2 - 240);
-  const animatedStyles = useAnimatedStyle(() => ({
-    transform: [{ translateX: offset.value }],
-  }));
 
   const { tokens, useToken, nextTokenIn } = useTokenManager();
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
@@ -66,7 +63,7 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (tokens < 2 && nextTokenIn !== null) {
+    if (tokens < 3 && nextTokenIn !== null) {
       const start = Date.now();
       const interval = setInterval(() => {
         const msLeft = Math.max(0, nextTokenIn - (Date.now() - start));
@@ -88,7 +85,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white ">
       {battles[currentBattleIndex]}
       <View className="flex-1 justify-center items-center">
         <View style={{ flexDirection: "row", marginBottom: 20 }}>
@@ -124,12 +121,6 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  box: {
-    height: 120,
-    width: 120,
-    backgroundColor: "#ef4444",
-    borderRadius: 16,
-  },
   bottomSpacer: {
     height: 120,
   },
@@ -138,6 +129,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,
+    marginBottom: 80,
   },
   buttonText: {
     color: "#fff",
