@@ -71,6 +71,7 @@ export default function GameScreen({ navigation }) {
   const opacity = useSharedValue(0);
   const redOpacity = useSharedValue(0);
   const lostOpacity = useSharedValue(0);
+  const endOpacity = useSharedValue(0);
 
   const rockOpacity = useSharedValue(1);
   const paperOpacity = useSharedValue(1);
@@ -89,7 +90,7 @@ export default function GameScreen({ navigation }) {
   const centerX = width / 2 - cardWidth / 2;
   const centerY = height / 2 - cardHeight / 2;
 
-  const [rounds, setRounds] = useState(1);
+  const [rounds, setRounds] = useState(13);
   const word = toWords(rounds);
 
   const [lossMessage, setLossMessage] = useState("");
@@ -146,8 +147,18 @@ export default function GameScreen({ navigation }) {
       paperOpacity.value = withTiming(1, { duration: 500 });
       scissorsOpacity.value = withTiming(1, { duration: 500 });
       if (result.result === "winner") {
-        setRounds((prev) => prev + 1);
-        textOpacity.value = withTiming(1, { duration: 500 });
+        setRounds((prev) => {
+          const newRound = prev + 1;
+          if (newRound > 13) {
+            endOpacity.value = withTiming(1, { duration: 6000 }, () => {
+              runOnJS(navigation.navigate)("End");
+            });
+            return newRound;
+          } else {
+            textOpacity.value = withTiming(1, { duration: 500 });
+          }
+          return newRound;
+        });
       } else {
         redOpacity.value = withTiming(0.7, { duration: 1000 });
         lostOpacity.value = withTiming(1, { duration: 1000 });
@@ -200,6 +211,17 @@ export default function GameScreen({ navigation }) {
 
   const lostStyle = useAnimatedStyle(() => ({
     opacity: lostOpacity.value,
+  }));
+
+  const endStyle = useAnimatedStyle(() => ({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width,
+    height,
+    backgroundColor: "#fff",
+    opacity: endOpacity.value,
+    zIndex: 9999,
   }));
 
   const selectedCardTransform = (card: "rock" | "paper" | "scissors") =>
@@ -370,6 +392,10 @@ export default function GameScreen({ navigation }) {
           </Pressable>
         </View>
       </View>
+      <Animated.View
+        pointerEvents={endOpacity.value === 0 ? "none" : "auto"}
+        style={endStyle}
+      />
     </View>
   );
 }
@@ -377,7 +403,7 @@ export default function GameScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
